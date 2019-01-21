@@ -1,0 +1,59 @@
+README
+================
+Raul J.T.A.
+12/20/2019
+
+Overview
+--------
+
+Functional data analysis denotes a branch of statistics centered on analyzing data in the forms of functions, images, and shapes varying across time, space, or other continua. Some examples are audio recordings, fMRI data, oxygen flow, daily precipitation data, or samples of handwriting. One very defining feature of this data is that for a single observation, measurements are obtained at a high-frequency, e.g. multiple times a second. Apart from this, the data also tend to consist of equally-spaced measurements, and multiple observations per subject. Yet this rich data is not without its computational challenges. Below I offer a cursory look at some of those difficulties on a small example dataset. I pay special attention to the extra processing involved to get the data the point below, where it is ready for analysis.
+
+<img src="/Users/Raul/Desktop/Working/fda/output/fda_objects.png" width="70%" style="display: block; margin: auto;" />
+
+Technical
+---------
+
+All coding including this README file were generated through `R` and `RMarkdown`. In addition, this is a `packrat` project, which means that you may have to install the package `packrat` in an effort to ensure reproducibility. No seed was set for the generation of the missingness plot, as the intention was conceptual.
+
+Code overview
+-------------
+
+Working with functional data involved more processing on the front-end, but enables a higher quality analysis. Most of the methods are contained within the `fda` package Ramsay, Hooker, and Graves (2009), along with the `fda.usc` package. My attached code roughly does this:
+
+1.  Plots three of the many modalities that are measured.
+2.  Illustrates how missing data would be explored for one of these modalities through the `VIM` package.
+3.  **Creates and plots the functional object**.
+4.  Performs fPCA on one modality as a token example of the added complexity to analysis.
+
+Creating the functional object is the key behind beginning any functional data analysis. Although the code is very complex, the simplest approach outlined in Ramsay, Hooker, and Graves (2009) is to call the `smooth.basis(argvals, y, fdParobj)`, where three parameters are essential:
+
+`argvals` - set of argument values corresponding to the continua along which the data is measured, e.g. time.
+`y` - set of values for curves at discrete sampling points or argument values; must be in a matrix.
+`fdParobj` - functional basis object containing basis system used in defining this object, e.g. fourier, bsplines.
+
+These three pieces are the key toward utlizing many of the worthwhile features unique to functional objects, such as derivatives, operations on curves, and functional models.
+
+Data Processing
+---------------
+
+*Tidying* data of this functional nature takes some extra care and attention. To illustrate, we considered a small dataset consisting from 13 reads of a medical device measuring a wide array of respiratory measurements. There are 33-34 variables per each read, where each read was done on a separate individual. To begin we must determine the rate at which the data was captured, which is twice every second. After that, we must decide what part of the function we want to extract to analyze across all subjects, such that they "line-up", i.e **registration**. Sometimes this involves transforming the data, but for simplicity, we just take the first 5 minutes of the data, which consists of 600 rows. All of this is outlined in the code. Below we plot 12 of the 13 patients across 5 minutes of the "Flow" modality.
+<img src="/Users/Raul/Desktop/Working/fda/output/flow.png" width="70%" style="display: block; margin: auto;" /> Visualizaing such dense data is often useful to pick out any inconsistencies such as outliers. There appear to be large spikes in this modality, and in patient 12 a large abnormality which with expert knowledge we identified as a problem with the datset. After teasing out insight from the subject-level plots, we could also take on the missingness per subject.
+
+Below we simulate different levels of missingness per subject as outlined in the code. On the left we have the proportion of missing data for each observation, which is key information. In addition, we could create a plot similar to the one on the right, where column represents an observation, and each square represents a time-point. What this plot would illustrate is whether the data was missing for an individual, at a certain time-point. This would help understand whether there were any patterns of missingness in the data. Currently that is not what the plot on the right illustrates, but hopefully the idea is clear.
+
+<img src="/Users/Raul/Desktop/Working/fda/output/missingness.png" width="60%" style="display: block; margin: auto;" />
+
+After dealing with both the outliers, missing data, and any inconsistencies, we would still have to create the functional object itself before we can move on to analysis. A pivotal choice every user has to make is regarding the type and number of basis functions. For guidance on this, consult this great resource:
+
+<https://www.mailman.columbia.edu/sites/default/files/pdf/fda_shortcourse.pdf>
+
+After the functional object has been created, the analysis proceeds as usual, until one is concerned with analytic methods or models containing the functional variable. Although this is still an active area of research, there are many established methods and models which have extended previous results into this new domain. The primary challenge is interpreting these older methods for this new type of varible. For example, when including a functional covariate in a model, the coefficient for that model is also a function, and must be interpreted as such.
+
+For a more concrete example, below we have extract three principal components for our Vte variable. Each bold line represents the mean curve, along with a + or - denoting the consequence of adding or subtracting a small amount of each principal component. The top three rows represent the original prinicipal components, and the bottom the rotated principal components. One interesting observation is that the bottom-left rotated principal component captures what appears like greater variablility toward the end of our curve window. <img src="/Users/Raul/Desktop/Working/fda/output/vte_pca.png" width="70%" style="display: block; margin: auto;" />
+
+In closing, while this field presents theoretical and computational challenges for the field of statistics, it also presents many new and exciting opportunities. And in our age where data is pouring in faster and faster, it could not have come at a better point in time.
+
+References
+----------
+
+Ramsay, J. O., Giles Hooker, and Spencer Graves. 2009. *Functional Data Analysis with R and Matlab*. 1st ed. Springer Publishing Company, Incorporated.
