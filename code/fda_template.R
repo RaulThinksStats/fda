@@ -6,8 +6,9 @@
 # Summary: Cursory overview of analysis involving a functional object.
 #***************************************************************************
 
-#preliminary Settings----------------------------------------------------
-
+#***************************************************************************
+# preliminary settings------------------------------------------------------
+#***************************************************************************
 
 library(fda)
 library(fda.usc)
@@ -16,8 +17,9 @@ library(VIM)
 
 setwd("data/")
 
-
-#setting up Data--------------------------------------------------------
+#***************************************************************************
+# setting up data-----------------------------------------------------------
+#***************************************************************************
 
 temp = list.files(pattern="*.csv")
 rfm = map(temp, read_csv)
@@ -31,8 +33,10 @@ vte <- as.matrix(map_dfc(rfm, function(x) x[1:600,"Vte"]))
 vti <- as.matrix(map_dfc(rfm, function(x) x[1:600,"Vti"]))
 
 
+#***************************************************************************
+# plotting raw data---------------------------------------------------------
+#***************************************************************************
 
-#plotting raw data--------------------------------------------------------
 
 par(mfrow = c(4,3))
 
@@ -51,7 +55,11 @@ for (i in 1:12){
 }
 par(mfrow = c(1,1))
 
-#missing data + outliers ---------------------------------------------------------
+
+#***************************************************************************
+# missing data + outliers --------------------------------------------------
+#***************************************************************************
+
 
 #missingness simulation
 miss_prob <- runif(13, 0, .3)
@@ -62,10 +70,14 @@ vti_miss[,i] <- miss_ind[,i] * vti[,i]}
 vti_miss <- apply(vti_miss, 2, function(x) ifelse(x == 0, NA, x))
 
 #visualizing missingness to explore potential patterns
-aggr_plot <- aggr(vti_miss, col=c('navyblue','red'), numbers=TRUE, sortVars=FALSE, labels=names(data), cex.axis=.7, gap=3, ylab=c("Histogram of missing data","Pattern"))
+aggr_plot <- aggr(vti_miss, col=c('navyblue','red'), numbers=TRUE,
+                  sortVars=FALSE, labels=names(data), cex.axis=.7, gap=3, 
+                  ylab=c("Histogram of missing data","Pattern"))
 
 
-#creating functional object--------------------------------------------------------
+#***************************************************************************
+# creating functional object------------------------------------------------
+#***************************************************************************
 
 
 fdnames = vector("list", 3)
@@ -106,7 +118,10 @@ vtifd$fdnames = list("Time (recorded every 0.5 seconds)",
                       "Patient ID",
                       "VTI Metric")
 
-# visualizing functional object--------------------------------------------------------------
+
+#***************************************************************************
+# visualizing functional object---------------------------------------------
+#***************************************************************************
 
 
 summary(flow)
@@ -121,9 +136,11 @@ plot(vtifd, lty=1, main = "VTI Curves for 13 Patients", ylim = c(0,85))
 lines(mean(vtifd), lty = 1, lwd = 4, col = "black")
 ar(mfrow = c(1,1))
 
-#commented lines yield naive CIs
 
-# principal components analysis---------------------------------------------------
+#***************************************************************************
+# principal components analysis---------------------------------------------
+#***************************************************************************
+
 
 par(mfrow = c(2,3))
 flow.pcalist = pca.fd(flowfd, 3)
